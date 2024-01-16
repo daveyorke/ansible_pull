@@ -27,4 +27,3 @@
       - virt-manager
       - vagrant
       - vagrant-libvirt
-      - multipass
