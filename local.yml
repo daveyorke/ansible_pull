@@ -2,34 +2,11 @@
   connection: local
   become: true
 
+  pre-tasks:
+    - name: update repositories
+      apt:
+        update_cache: yes
+      changed_when: False
+
   tasks:
-  - name: Install package manager related apps
-    apt:
-      name: 
-        - snapd
-        - plasma-discover-backend-snap
-        - flatpak
-        - plasma-discover-backend-flatpak
-        - nala
-        - apt-file
-  - name: Install common packages
-    apt:
-      name: 
-        - vim
-        - htop
-        - btop
-        - tmux
-        - zram-tools
-        - verse
-        - exa
-        - neofetch
-  - name: Install virtualization packages
-    apt:
-      name: 
-        - podman
-        - qemu-system
-        - libvirt-daemon-system
-        - virt-manager
-        - vagrant
-        - vagrant-libvirt
-        - multipass
+    - include: tasks/packages.yml
