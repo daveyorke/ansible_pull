@@ -13,3 +13,6 @@
     - include: tasks/cron.yml
     - include: tasks/packages.yml
 
+- hosts: servers
+  roles:
+  - server 
