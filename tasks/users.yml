@@ -2,6 +2,7 @@
   user:
     name: ansible
     system: yes
+    shell: /usr/sbin/nologin
 
 - name: copy sudoers_ansible
   copy:
