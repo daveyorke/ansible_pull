@@ -1,7 +1,7 @@
+[servers]
+debian12
+
 [workstations]
 neon
 onyx
 
-[servers]
-server1
-debian12
