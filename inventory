@@ -1,5 +1,5 @@
 [servers]
-debian.local
+debian.localdomain
 
 [workstations]
 neon
