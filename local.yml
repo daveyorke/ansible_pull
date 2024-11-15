@@ -9,6 +9,12 @@
       changed_when: False
 
 tasks:
+- name: Install some package
+  ansible.builtin.dnf:
+    name: htop
+    state: present
+  when: ansible_facts['hostname'] == "neon"
+
 #  - include: tasks/users.yml
 #  - include: tasks/cron.yml
 #  - include: tasks/packages.yml
@@ -17,8 +23,3 @@ tasks:
 #  roles:
 #  - common
 #  - server 
-  - name: Install some package
-    ansible.builtin.dnf:
-      name: htop
-      state: present
-    when: ansible_facts['hostname'] == "neon"
