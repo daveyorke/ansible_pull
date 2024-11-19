@@ -1,7 +1,10 @@
 # Prerequisites
-# - ansible
-# - community.general collection
 #
+# sudo dnf install ansible
+# git clone https://github.com/daveyorke/ansible_pull.git
+# ansible-galaxy collection install community.general
+# ansible-galaxy collection install community.crypto
+# ansible-pull -K -U https://github.com/daveyorke/ansible_pull.git
 #
 
 - hosts: localhost
@@ -13,7 +16,25 @@
 #        update_cache: yes
 #      changed_when: False
 
+
   tasks:
+
+  - name: Generate SSH keypair
+    community.crypto.openssh_keypair:
+      path: /home/dave/.ssh/id_rsa
+      owner: dave
+      group: dave
+    register: publickey
+
+  - name: display public key
+    debug:
+      msg: "{{ publickey }}"
+  
+  - name: Pause to confirm SSH keys copied to github
+    ansible.builtin.pause:
+      prompt: "Ensure ssh keys are copied to github"
+
+
   - name: Install community.general collection
     ansible.builtin.pip:
       name: psutil
@@ -26,12 +47,6 @@
     when: ansible_facts['hostname'] == "neon"
     become: true
 
-  - name: Install htop
-    ansible.builtin.dnf:
-      name: htop
-      state: present
-    when: ansible_facts['hostname'] == "neon"
-    become: true
     
   - name: Install timeshift
     ansible.builtin.dnf:
@@ -44,19 +59,95 @@
     ansible.builtin.shell:
       cmd: timeshift --create --comment "Initial snapshot"
     when: ansible_facts['hostname'] == "neon"
+    run_once: true
     become: true
 
   - name: Setup gnome
     dconf:
       key: "/org/gnome/mutter/experimental-features"
       value: "['variable-refresh-rate','scale-monitor-framebuffer']"
-    when: ansible_facts['hostname'] == "neon"
+    when: (ansible_facts['hostname'] == "neon" and ansible_env['XDG_SESSION_DESKTOP'] == "gnome")
   
   - name: Swap CAPS and ESC
     dconf:
       key: "/org/gnome/desktop.input-sources.xkb-options"
       value: "['caps:swapescape']"
     when: ansible_facts['hostname'] == "neon"
+
+  - name: Install steam
+    ansible.builtin.dnf:
+      name: steam
+      state: present
+    when: ansible_facts['hostname'] == "neon"
+    become: true
+
+
+  - name: Install flatpaks
+    community.general.flatpak:
+      name: "{{ item.name }}"
+      state: present
+    with_items:
+      - { name: "org.gnome.Extensions" }
+      - { name: "com.mattjakeman.ExtensionManager" }
+    when: ansible_facts['hostname'] == "neon"
+    
+
+  - name: Install dropbox
+    ansible.builtin.dnf:
+      name: roles/neon/files/nautilus-dropbox-2024.04.17-1.fc39.x86_64.rpm
+      state: present
+      disable_gpg_check: true
+    when: ansible_facts['hostname'] == "neon"
+    become: true
+
+  - name: Install gnu stow
+    ansible.builtin.dnf:
+      name: stow
+      state: present
+    become: true
+
+  - name: Clone my dotfiles from github
+    ansible.builtin.git:
+      repo: git@github.com:daveyorke/.stowdotfiles.git
+      dest: /home/dave/.stowdotfiles
+
+  - name: Remove any conflicting dotfiles
+    ansible.builtin.file:
+      path: "/home/dave/{{ item.name }}"
+      state: absent
+    with_items:
+      - { name: ".ansible.cfg" }
+      - { name: ".bash_aliases" }
+      - { name: ".bashrc" }
+      - { name: ".profile" }
+      - { name: "bin" }
+      - { name: ".config/kitty" }
+      - { name: ".tmux.conf" }
+      - { name: ".vimrc" }
+
+  - name: Stow my dotfiles and bin folder
+    ansible.builtin.shell:
+      cmd: "stow {{ item.name }}"
+      chdir: /home/dave/.stowdotfiles
+    with_items:
+      - { name: "ansible" }
+      - { name: "bash" }
+      - { name: "bin" }
+      - { name: "kitty" }
+      - { name: "tmux" }
+      - { name: "vim" }
+
+
+  - name: Install packages
+    ansible.builtin.dnf:
+      name: "{{ item.name }}"
+      state: present
+    with_items:
+      - { name: "htop" }
+      - { name: "screenfetch" }
+      - { name: "eza" }
+    when: ansible_facts['hostname'] == "neon"
+    become: true
 
 
   #  - include: tasks/users.yml

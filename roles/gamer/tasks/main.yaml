@@ -1,0 +1,7 @@
+  - name: Install steam
+    ansible.builtin.dnf:
+      name: steam
+      state: present
+    when: ansible_facts['hostname'] == "neon"
+    become: true
+
