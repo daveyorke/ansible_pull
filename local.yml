@@ -1,3 +1,9 @@
+# Prerequisites
+# - ansible
+# - community.general collection
+#
+#
+
 - hosts: localhost
   connection: local
 
@@ -8,19 +14,38 @@
 #      changed_when: False
 
   tasks:
+  - name: Install community.general collection
+    ansible.builtin.pip:
+      name: psutil
+    when: ansible_facts['hostname'] == "neon"
+    become: true
+    
   - name: Install some psutil python dependency for gconf
     ansible.builtin.pip:
       name: psutil
     when: ansible_facts['hostname'] == "neon"
     become: true
 
-  - name: Install some package
+  - name: Install htop
     ansible.builtin.dnf:
       name: htop
       state: present
     when: ansible_facts['hostname'] == "neon"
     become: true
     
+  - name: Install timeshift
+    ansible.builtin.dnf:
+      name: timeshift
+      state: present
+    when: ansible_facts['hostname'] == "neon"
+    become: true
+    
+  - name: Take first snapshot backup
+    ansible.builtin.shell:
+      cmd: timeshift --create --comment "Initial snapshot"
+    when: ansible_facts['hostname'] == "neon"
+    become: true
+
   - name: Setup gnome
     dconf:
       key: "/org/gnome/mutter/experimental-features"
