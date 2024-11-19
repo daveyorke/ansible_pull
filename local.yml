@@ -1,6 +1,5 @@
 - hosts: localhost
   connection: local
-  become: true
 
 #  pre_tasks:
 #    - name: update repositories
@@ -9,12 +8,32 @@
 #      changed_when: False
 
   tasks:
+  - name: Install some psutil python dependency for gconf
+    ansible.builtin.pip:
+      name: psutil
+    when: ansible_facts['hostname'] == "neon"
+    become: true
+
   - name: Install some package
     ansible.builtin.dnf:
       name: htop
       state: present
     when: ansible_facts['hostname'] == "neon"
+    become: true
+    
+  - name: Setup gnome
+    dconf:
+      key: "/org/gnome/mutter/experimental-features"
+      value: "['variable-refresh-rate','scale-monitor-framebuffer']"
+    when: ansible_facts['hostname'] == "neon"
   
+  - name: Swap CAPS and ESC
+    dconf:
+      key: "/org/gnome/desktop.input-sources.xkb-options"
+      value: "['caps:swapescape']"
+    when: ansible_facts['hostname'] == "neon"
+
+
   #  - include: tasks/users.yml
   #  - include: tasks/cron.yml
   #  - include: tasks/packages.yml
