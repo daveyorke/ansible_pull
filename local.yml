@@ -26,6 +26,20 @@
       group: dave
     register: publickey
 
+  - name: Ensure openssh is installed
+    ansible.builtin.dnf:
+      name: openssh
+      state: present
+    when: ansible_facts['hostname'] == "neon"
+    become: true
+
+  - name: Ensure openssh is enabled
+    ansible.builtin.systemd_service:
+      name: sshd
+      enabled: true
+      state: started
+
+
   - name: display public key
     debug:
       msg: "{{ publickey }}"
@@ -55,6 +69,13 @@
     when: ansible_facts['hostname'] == "neon"
     become: true
     
+  - name: Delete any existing snapshots (for testing only)
+    ansible.builtin.shell:
+      cmd: timeshift --delete-all --scripted || /bin/true
+    when: ansible_facts['hostname'] == "neon"
+    run_once: true
+    become: true
+    
   - name: Take first snapshot backup
     ansible.builtin.shell:
       cmd: timeshift --create --comment "Initial snapshot"
@@ -66,7 +87,8 @@
     dconf:
       key: "/org/gnome/mutter/experimental-features"
       value: "['variable-refresh-rate','scale-monitor-framebuffer']"
-    when: (ansible_facts['hostname'] == "neon" and ansible_env['XDG_SESSION_DESKTOP'] == "gnome")
+    when: (ansible_facts['hostname'] == "neon")
+#    when: (ansible_facts['hostname'] == "neon" and ansible_env['XDG_SESSION_DESKTOP'] == "gnome")
   
   - name: Swap CAPS and ESC
     dconf:
@@ -89,8 +111,10 @@
     with_items:
       - { name: "org.gnome.Extensions" }
       - { name: "com.mattjakeman.ExtensionManager" }
+      - { name: "md.obsidian.Obsidian" }
     when: ansible_facts['hostname'] == "neon"
-    
+    become: true
+
 
   - name: Install dropbox
     ansible.builtin.dnf:
