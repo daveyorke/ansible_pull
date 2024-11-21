@@ -110,7 +110,7 @@
   
   - name: Swap CAPS and ESC
     dconf:
-      key: "/org/gnome/desktop.input-sources.xkb-options"
+      key: "/org/gnome/desktop/input-sources/xkb-options"
       value: "['caps:swapescape']"
     when: ansible_facts['hostname'] == "neon"
 
