@@ -18,6 +18,11 @@
 
 
   tasks:
+  - name: Upgrade all packages
+    ansible.builtin.dnf:
+      name: "*"
+      state: latest
+    become: true
 
   - name: Generate SSH keypair
     community.crypto.openssh_keypair:
@@ -96,6 +101,12 @@
       value: "['caps:swapescape']"
     when: ansible_facts['hostname'] == "neon"
 
+  - name: Enable minimize and maximize buttons on windows
+    dconf:
+      key: "/org/gnome/desktop/wm/preferences/button-layout"
+      value: "':minimize,maximize,close'"
+    when: ansible_facts['hostname'] == "neon"
+
   - name: Install steam
     ansible.builtin.dnf:
       name: steam
@@ -103,6 +114,12 @@
     when: ansible_facts['hostname'] == "neon"
     become: true
 
+  - name: Install google-chrome-stable
+    ansible.builtin.dnf:
+      name: google-chrome-stable
+      state: present
+    when: ansible_facts['hostname'] == "neon"
+    become: true
 
   - name: Install flatpaks
     community.general.flatpak:
@@ -170,6 +187,7 @@
       - { name: "htop" }
       - { name: "screenfetch" }
       - { name: "eza" }
+      - { name: "dconf-editor" }
     when: ansible_facts['hostname'] == "neon"
     become: true
 
