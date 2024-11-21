@@ -107,6 +107,13 @@
       value: "':minimize,maximize,close'"
     when: ansible_facts['hostname'] == "neon"
 
+  - name: gnome | shell settings | event-sounds (disable)
+    tags: gnome,audio,sounds,alerts
+    become_user: dave
+    dconf:
+      key: "/org/gnome/desktop/sound/event-sounds"
+      value: "false"
+
   - name: Install steam
     ansible.builtin.dnf:
       name: steam
