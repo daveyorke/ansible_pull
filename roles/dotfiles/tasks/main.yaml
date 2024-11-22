@@ -1,0 +1,39 @@
+- name: Install gnu stow
+  ansible.builtin.dnf:
+    name: stow
+    state: present
+  become: true
+
+- name: Clone my dotfiles from github
+  ansible.builtin.git:
+    repo: git@github.com:daveyorke/.stowdotfiles.git
+    dest: /home/dave/.stowdotfiles
+    accept_newhostkey: true
+
+- name: Remove any conflicting dotfiles
+  ansible.builtin.file:
+    path: "/home/dave/{{ item.name }}"
+    state: absent
+  with_items:
+    - { name: ".ansible.cfg" }
+    - { name: ".bash_aliases" }
+    - { name: ".bashrc" }
+    - { name: ".profile" }
+    - { name: "bin" }
+    - { name: ".config/kitty" }
+    - { name: ".tmux.conf" }
+    - { name: ".vimrc" }
+    - { name: ".gitconfig" }
+
+- name: Stow my dotfiles and bin folder
+  ansible.builtin.shell:
+    cmd: "stow {{ item.name }}"
+    chdir: /home/dave/.stowdotfiles
+  with_items:
+    - { name: "ansible" }
+    - { name: "bash" }
+    - { name: "bin" }
+    - { name: "kitty" }
+    - { name: "tmux" }
+    - { name: "vim" }
+    - { name: "git" }

@@ -1,0 +1,48 @@
+- name: Setup gnome
+  dconf:
+    key: "/org/gnome/mutter/experimental-features"
+    value: "['variable-refresh-rate','scale-monitor-framebuffer']"
+  when: (ansible_facts['hostname'] == "neon")
+
+- name: Swap CAPS and ESC
+  dconf:
+    key: "/org/gnome/desktop/input-sources/xkb-options"
+    value: "['caps:swapescape']"
+  when: ansible_facts['hostname'] == "neon"
+
+- name: Enable minimize and maximize buttons on windows
+  dconf:
+    key: "/org/gnome/desktop/wm/preferences/button-layout"
+    value: "':minimize,maximize,close'"
+  when: ansible_facts['hostname'] == "neon"
+
+- name: gnome | shell settings | event-sounds (disable)
+  tags: gnome,audio,sounds,alerts
+  become_user: dave
+  dconf:
+    key: "/org/gnome/desktop/sound/event-sounds"
+    value: "false"
+
+- name: Setup gnome
+  dconf:
+    key: "/org/gnome/shell/favorite-apps"
+    value: "['org.gnome.Terminal.desktop', 'google-chrome.desktop', 'org.gnome.Nautilus.desktop', 'virt-manager.desktop']"
+  when: (ansible_facts['hostname'] == "neon")
+
+- name: Install gnome-related packages
+  ansible.builtin.dnf:
+    name: "{{ item.name }}"
+    state: present
+  with_items:
+    - { name: "dconf-editor" }
+  when: ansible_facts['hostname'] == "neon"
+  become: true
+
+- name: Install gnome-related flatpaks
+  community.general.flatpak:
+    name: "{{ item.name }}"
+    state: present
+  with_items:
+    - { name: "org.gnome.Extensions" }
+    - { name: "com.mattjakeman.ExtensionManager" }
+

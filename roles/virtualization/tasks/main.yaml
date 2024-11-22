@@ -1,0 +1,32 @@
+- name: Install virtualization and vagrant
+  ansible.builtin.dnf:
+    name: "{{ item.name }}"
+    state: present
+  with_items:
+    - { name: "@virtualization" }
+    - { name: "vagrant" }
+    - { name: "vagrant-libvirt" }
+  when: ansible_facts['hostname'] == "neon"
+  become: true
+
+- name: Start and enable libvirtd
+  ansible.builtin.systemd_service:
+    name: libvirtd
+    enabled: true
+    state: started
+  become: true
+
+- name: ensure /dev/sda1 is mounted to ~/lab
+  ansible.posix.mount:
+    path: /home/dave/lab
+    src: /dev/sda1
+    fstype: ext4
+    state: mounted
+  become: true
+
+- name: add dave to libvirt group
+  ansible.builtin.user:
+    name: dave
+    groups: libvirt
+    append: yes
+  become: true

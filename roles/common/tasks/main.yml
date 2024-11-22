@@ -1,7 +1,0 @@
-- name: Install package manager related apps
-  apt:
-    name: 
-      - vim
-      - htop
-      - btop
-      - neofetch

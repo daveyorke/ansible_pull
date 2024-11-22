@@ -9,14 +9,6 @@
 
 - hosts: localhost
   connection: local
-
-#  pre_tasks:
-#    - name: update repositories
-#      apt:
-#        update_cache: yes
-#      changed_when: False
-
-
   tasks:
   - name: Upgrade all packages
     ansible.builtin.dnf:
@@ -24,223 +16,36 @@
       state: latest
     become: true
 
-  - name: create .ssh folder in home folder
-    ansible.builtin.file:
-      path: /home/dave/.ssh
-      state: directory
 
-  - name: Generate SSH keypair
-    community.crypto.openssh_keypair:
-      path: /home/dave/.ssh/id_rsa
-      owner: dave
-      group: dave
-    register: publickey
-
-  - name: Ensure openssh is installed
-    ansible.builtin.dnf:
-      name: openssh
-      state: present
-    when: ansible_facts['hostname'] == "neon"
-    become: true
-
-  - name: Ensure python3-pip is installed
-    ansible.builtin.dnf:
-      name: python3-pip
-      state: present
-    when: ansible_facts['hostname'] == "neon"
-    become: true
-
-  - name: Ensure openssh is enabled
-    ansible.builtin.systemd_service:
-      name: sshd
-      enabled: true
-      state: started
-    become: true
-
-
-  - name: display public key
-    debug:
-      msg: "{{ publickey }}"
-  
-  - name: Pause to confirm SSH keys copied to github
-    ansible.builtin.pause:
-      prompt: "Ensure ssh keys are copied to github"
-
-
-  - name: Install community.general collection
-    ansible.builtin.pip:
-      name: psutil
-    when: ansible_facts['hostname'] == "neon"
-    become: true
-    
-  - name: Install some psutil python dependency for gconf
+- hosts: localhost
+  connection: local
+  tasks:
+  - name: Install some psutil python dependency for dconf
     ansible.builtin.pip:
       name: psutil
     when: ansible_facts['hostname'] == "neon"
     become: true
 
-    
-  - name: Install timeshift
-    ansible.builtin.dnf:
-      name: timeshift
-      state: present
-    when: ansible_facts['hostname'] == "neon"
-    become: true
-    
-  - name: Delete any existing snapshots (for testing only)
-    ansible.builtin.shell:
-      cmd: timeshift --delete-all --scripted || /bin/true
-    when: ansible_facts['hostname'] == "neon"
-    run_once: true
-    become: true
-    
-  - name: Take first snapshot backup
-    ansible.builtin.shell:
-      cmd: timeshift --create --comment "Initial snapshot"
-    when: ansible_facts['hostname'] == "neon"
-    run_once: true
-    become: true
-
-  - name: Setup gnome
-    dconf:
-      key: "/org/gnome/mutter/experimental-features"
-      value: "['variable-refresh-rate','scale-monitor-framebuffer']"
-    when: (ansible_facts['hostname'] == "neon")
-#    when: (ansible_facts['hostname'] == "neon" and ansible_env['XDG_SESSION_DESKTOP'] == "gnome")
-  
-  - name: Swap CAPS and ESC
-    dconf:
-      key: "/org/gnome/desktop/input-sources/xkb-options"
-      value: "['caps:swapescape']"
-    when: ansible_facts['hostname'] == "neon"
-
-  - name: Enable minimize and maximize buttons on windows
-    dconf:
-      key: "/org/gnome/desktop/wm/preferences/button-layout"
-      value: "':minimize,maximize,close'"
-    when: ansible_facts['hostname'] == "neon"
-
-  - name: gnome | shell settings | event-sounds (disable)
-    tags: gnome,audio,sounds,alerts
-    become_user: dave
-    dconf:
-      key: "/org/gnome/desktop/sound/event-sounds"
-      value: "false"
-
-  - name: Install google-chrome-stable
-    ansible.builtin.dnf:
-      name: google-chrome-stable
-      state: present
-    when: ansible_facts['hostname'] == "neon"
-    become: true
-
-  - name: Install flatpaks
-    community.general.flatpak:
-      name: "{{ item.name }}"
-      state: present
-    with_items:
-      - { name: "org.gnome.Extensions" }
-      - { name: "com.mattjakeman.ExtensionManager" }
-      - { name: "md.obsidian.Obsidian" }
-      - { name: "com.valvesoftware.Steam" }
-      - { name: "com.valvesoftware.Steam.CompatibilityTool.Proton-GE" }
-      - { name: "com.todoist.Todoist" }
-
-    when: ansible_facts['hostname'] == "neon"
-    become: true
+#- hosts: localhost
+#  connection: local
+#  tasks:
+#  - name: install dropbox
+#    ansible.builtin.dnf:
+#      name: roles/common/files/nautilus-dropbox-2024.04.17-1.fc39.x86_64.rpm
+#      state: present
+#      disable_gpg_check: true
+#    become: true
 
 
-  - name: Install dropbox
-    ansible.builtin.dnf:
-      name: roles/neon/files/nautilus-dropbox-2024.04.17-1.fc39.x86_64.rpm
-      state: present
-      disable_gpg_check: true
-    when: ansible_facts['hostname'] == "neon"
-    become: true
-
-  - name: Install gnu stow
-    ansible.builtin.dnf:
-      name: stow
-      state: present
-    become: true
-
-  - name: Clone my dotfiles from github
-    ansible.builtin.git:
-      repo: git@github.com:daveyorke/.stowdotfiles.git
-      dest: /home/dave/.stowdotfiles
-      accept_newhostkey: true
-
-  - name: Remove any conflicting dotfiles
-    ansible.builtin.file:
-      path: "/home/dave/{{ item.name }}"
-      state: absent
-    with_items:
-      - { name: ".ansible.cfg" }
-      - { name: ".bash_aliases" }
-      - { name: ".bashrc" }
-      - { name: ".profile" }
-      - { name: "bin" }
-      - { name: ".config/kitty" }
-      - { name: ".tmux.conf" }
-      - { name: ".vimrc" }
-
-  - name: Stow my dotfiles and bin folder
-    ansible.builtin.shell:
-      cmd: "stow {{ item.name }}"
-      chdir: /home/dave/.stowdotfiles
-    with_items:
-      - { name: "ansible" }
-      - { name: "bash" }
-      - { name: "bin" }
-      - { name: "kitty" }
-      - { name: "tmux" }
-      - { name: "vim" }
+- hosts: localhost
+  connection: local
+  roles:
+    - role: common
+    - role: ssh
+    - role: gnome
+    - role: dotfiles
+    - role: timeshift
+    - role: virtualization
+    - role: steam
 
 
-  - name: Install packages
-    ansible.builtin.dnf:
-      name: "{{ item.name }}"
-      state: present
-    with_items:
-      - { name: "htop" }
-      - { name: "screenfetch" }
-      - { name: "eza" }
-      - { name: "dconf-editor" }
-    when: ansible_facts['hostname'] == "neon"
-    become: true
-
-  - name: Install virtualization and vagrant
-    ansible.builtin.dnf:
-      name: "{{ item.name }}"
-      state: present
-    with_items:
-      - { name: "@virtualization" }
-      - { name: "vagrant" }
-      - { name: "vagrant-libvirt" }
-
-    when: ansible_facts['hostname'] == "neon"
-    become: true
-
-  - name: Start and enable libvirtd
-    ansible.builtin.systemd_service:
-      name: libvirtd
-      enabled: true
-      state: started
-    become: true
-
-  - name: ensure /dev/sda1 is mounted to ~/lab
-    ansible.posix.mount:
-      path: /home/dave/lab
-      src: /dev/sda1
-      fstype: ext4
-      state: mounted
-    become: true
-
-  #  - include: tasks/users.yml
-  #  - include: tasks/cron.yml
-  #  - include: tasks/packages.yml
-  
-  #- hosts: servers
-  #  roles:
-  #  - common
-  #  - server 

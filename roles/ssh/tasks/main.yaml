@@ -1,0 +1,42 @@
+- name: create .ssh folder in home folder
+  ansible.builtin.file:
+    path: /home/dave/.ssh
+    state: directory
+
+- name: Generate SSH keypair
+  community.crypto.openssh_keypair:
+    path: /home/dave/.ssh/id_rsa
+    owner: dave
+    group: dave
+  register: publickey
+
+- name: Ensure openssh is installed
+  ansible.builtin.dnf:
+    name: openssh
+    state: present
+  when: ansible_facts['hostname'] == "neon"
+  become: true
+
+- name: Ensure python3-pip is installed
+  ansible.builtin.dnf:
+    name: python3-pip
+    state: present
+  when: ansible_facts['hostname'] == "neon"
+  become: true
+
+- name: Ensure openssh is enabled
+  ansible.builtin.systemd_service:
+    name: sshd
+    enabled: true
+    state: started
+  become: true
+
+
+- name: display public key
+  debug:
+    msg: "{{ publickey.public_key }}"
+
+- name: Pause to confirm SSH keys copied to github
+  ansible.builtin.pause:
+    prompt: "Ensure ssh keys are copied to github"
+

@@ -1,0 +1,14 @@
+- name: Install timeshift
+  ansible.builtin.dnf:
+    name: timeshift
+    state: present
+  when: ansible_facts['hostname'] == "neon"
+  become: true
+
+- name: Take first snapshot backup
+  ansible.builtin.shell:
+    cmd: timeshift --create --comment "Initial snapshot"
+  when: ansible_facts['hostname'] == "neon"
+  run_once: true
+  become: true
+

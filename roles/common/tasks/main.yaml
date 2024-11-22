@@ -1,0 +1,32 @@
+- name: Install common packages
+  ansible.builtin.dnf:
+    name: "{{ item.name }}"
+    state: present
+  with_items:
+    - { name: "htop" }
+    - { name: "vim" }
+    - { name: "screenfetch" }
+    - { name: "eza" }
+    - { name: "google-chrome-stable" }
+  when: ansible_facts['hostname'] == "neon"
+  become: true
+
+- name: Install flatpaks
+  community.general.flatpak:
+    name: "{{ item.name }}"
+    state: present
+  with_items:
+    - { name: "md.obsidian.Obsidian" }
+    - { name: "com.valvesoftware.Steam" }
+    - { name: "com.valvesoftware.Steam.CompatibilityTool.Proton-GE" }
+    - { name: "com.todoist.Todoist" }
+  when: ansible_facts['hostname'] == "neon"
+  become: true
+
+- name: install dropbox
+  ansible.builtin.dnf:
+    name: roles/common/files/nautilus-dropbox-2024.04.17-1.fc39.x86_64.rpm
+    state: present
+    disable_gpg_check: true
+  become: true
+

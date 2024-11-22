@@ -1,0 +1,10 @@
+- name: Install flatpaks
+  community.general.flatpak:
+    name: "{{ item.name }}"
+    state: present
+  with_items:
+    - { name: "com.valvesoftware.Steam" }
+    - { name: "com.valvesoftware.Steam.CompatibilityTool.Proton-GE" }
+  when: ansible_facts['hostname'] == "neon"
+  become: true
+
