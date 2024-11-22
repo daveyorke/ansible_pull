@@ -2,7 +2,7 @@
 #
 # sudo dnf install ansible
 # git clone https://github.com/daveyorke/ansible_pull.git
-# ansible-galaxy collection install community.general
+# ansible-galaxy collection install community.general --upgrade (to make use of nmcli "up/down" state)
 # ansible-galaxy collection install community.crypto
 # ansible-pull -K -U https://github.com/daveyorke/ansible_pull.git
 #

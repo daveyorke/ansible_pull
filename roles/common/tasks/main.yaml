@@ -25,7 +25,8 @@
 
 - name: install dropbox
   ansible.builtin.dnf:
-    name: roles/common/files/nautilus-dropbox-2024.04.17-1.fc39.x86_64.rpm
+    name: https://linux.dropboxstatic.com/packages/fedora/nautilus-dropbox-2024.04.17-1.fc39.x86_64.rpm
+    #name: roles/common/files/nautilus-dropbox-2024.04.17-1.fc39.x86_64.rpm
     state: present
     disable_gpg_check: true
   become: true

@@ -46,3 +46,34 @@
     - { name: "org.gnome.Extensions" }
     - { name: "com.mattjakeman.ExtensionManager" }
 
+- name: ensure fonts directory
+  file:
+    path: "{{ lookup('env', 'HOME') }}/.fonts"
+    state: directory
+  tags:
+    - fonts
+
+- name: Hack exists
+  shell: "ls {{ lookup('env', 'HOME') }}/.fonts/Hack*Nerd*Font*Complete*"
+  register: hack_exists
+  ignore_errors: yes
+  tags:
+    - fonts
+
+- name: Download Hack
+  when: hack_exists is failed
+  ansible.builtin.unarchive:
+    src: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Hack.zip
+    dest: "{{ lookup('env', 'HOME') }}/.fonts/"
+    remote_src: yes
+  tags:
+    - fonts
+
+- name: Setup hack fonts for terminal
+  dconf:
+    key: "/org/gnome/desktop/interface/monospace-font-name"
+    value: "'Hack Nerd Font Mono 12'"
+  when: (ansible_facts['hostname'] == "neon")
+  tags:
+    - fonts
+
