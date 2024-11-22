@@ -48,4 +48,25 @@
     - role: virtualization
     - role: steam
 
-
+# Update network to remove gateway from 10GB VLAN77
+- hosts: localhost
+  connection: local
+  tasks:
+  - name: remove default gateway from 10gbe nic
+    community.general.nmcli:
+      state: present
+      type: ethernet
+      ifname: enp5s0
+      gw4: ""
+      conn_name: "Wired connection 1"
+      gw4_ignore_auto: true
+      conn_reload: true
+    become: true
+  - name: bring nic back up
+    community.general.nmcli:
+      state: up
+      conn_name: "Wired connection 1"
+      conn_reload: true
+    become: true
+  tags:
+    - gateway
