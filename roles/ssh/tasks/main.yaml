@@ -1,7 +1,15 @@
+- name: Check if public key already exists
+  shell: "ls {{ lookup('env', 'HOME') }}/.ssh/id_rsa.pub"
+  register: lookup_pubkey
+  ignore_errors: yes
+  tags:
+    - ssh
+
 - name: create .ssh folder in home folder
   ansible.builtin.file:
     path: /home/dave/.ssh
     state: directory
+  when: lookup_pubkey is failed 
 
 - name: Generate SSH keypair
   community.crypto.openssh_keypair:
@@ -9,6 +17,7 @@
     owner: dave
     group: dave
   register: publickey
+  when: lookup_pubkey is failed 
 
 - name: Ensure openssh is installed
   ansible.builtin.dnf:
@@ -35,8 +44,10 @@
 - name: display public key
   debug:
     msg: "{{ publickey.public_key }}"
+  when: lookup_pubkey is failed 
 
 - name: Pause to confirm SSH keys copied to github
   ansible.builtin.pause:
     prompt: "Ensure ssh keys are copied to github"
+  when: lookup_pubkey is failed 
 
