@@ -30,4 +30,37 @@
     state: present
     disable_gpg_check: true
   become: true
+  tags:
+    - dropbox
 
+- name: delete home folder subdirectories and create symlinks to Dropbox
+  ansible.builtin.file:
+    path: "{{ lookup('env', 'HOME') }}/{{ item.name }}"
+    state: absent
+  with_items:
+    - { name: "Desktop" }
+    - { name: "Documents" }
+    - { name: "Downloads" }
+    - { name: "Music" }
+    - { name: "Photos" }
+    - { name: "Pictures" }
+    - { name: "Videos" }
+  tags:
+    - dropbox
+
+- name: create symlinks to ~/Dropbox/*
+  ansible.builtin.file:
+    src: "{{ lookup('env', 'HOME') }}/Dropbox/{{ lookup('env', 'USERNAME') }}/{{ item.name }}"
+    dest: "{{ lookup('env', 'HOME') }}/{{ item.name }}"
+    state: link
+    force: yes
+  with_items:
+    - { name: "Desktop" }
+    - { name: "Documents" }
+    - { name: "Downloads" }
+    - { name: "Music" }
+    - { name: "Photos" }
+    - { name: "Pictures" }
+    - { name: "Videos" }
+  tags:
+    - dropbox
