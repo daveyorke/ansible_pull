@@ -1,4 +1,4 @@
-- name: Setup gnome
+- name: Setup monitor for VRR and scaling
   dconf:
     key: "/org/gnome/mutter/experimental-features"
     value: "['variable-refresh-rate','scale-monitor-framebuffer']"
@@ -23,11 +23,17 @@
     key: "/org/gnome/desktop/sound/event-sounds"
     value: "false"
 
-- name: Setup gnome
+- name: Setup gnome favorite apps (dock) - Fedora 40
   dconf:
     key: "/org/gnome/shell/favorite-apps"
     value: "['org.gnome.Terminal.desktop', 'google-chrome.desktop', 'org.gnome.Nautilus.desktop', 'virt-manager.desktop']"
-  when: (ansible_facts['hostname'] == "neon")
+  when: (ansible_facts['hostname'] == "neon" and ansible_facts["distribution"] == "Fedora" and ansible_facts["distribution_version"] == "40")
+
+- name: Setup gnome favorite apps (dock) - Fedora 41
+  dconf:
+    key: "/org/gnome/shell/favorite-apps"
+    value: "['org.gnome.Ptyxis.desktop', 'google-chrome.desktop', 'org.gnome.Nautilus.desktop', 'virt-manager.desktop']"
+  when: (ansible_facts['hostname'] == "neon" and ansible_facts["distribution"] == "Fedora" and ansible_facts["distribution_version"] == "41")
 
 - name: Install gnome-related packages
   ansible.builtin.dnf:
