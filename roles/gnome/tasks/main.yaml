@@ -84,3 +84,11 @@
   tags:
     - fonts
 
+
+- name: Disable suspend timeout for AC power
+  dconf:
+    key: "/org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-timeout"
+    value: 0
+  when: (ansible_facts['hostname'] == "neon")
+  tags:
+    - power
