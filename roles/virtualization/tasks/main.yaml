@@ -6,8 +6,11 @@
     - { name: "@virtualization" }
     - { name: "vagrant" }
     - { name: "vagrant-libvirt" }
+    - { name: "kubernetes-client" }
   when: ansible_facts['hostname'] == "neon"
   become: true
+  tags:
+    - virt
 
 - name: Start and enable libvirtd
   ansible.builtin.systemd_service:
@@ -15,6 +18,8 @@
     enabled: true
     state: started
   become: true
+  tags:
+    - virt
 
 - name: ensure /dev/sda1 is mounted to ~/lab
   ansible.posix.mount:
@@ -23,6 +28,8 @@
     fstype: ext4
     state: mounted
   become: true
+  tags:
+    - virt
 
 - name: add dave to libvirt group
   ansible.builtin.user:
@@ -30,3 +37,14 @@
     groups: libvirt
     append: yes
   become: true
+  tags:
+    - virt
+
+- name: install minikube from remote repo
+  ansible.builtin.dnf:
+    name: https://storage.googleapis.com/minikube/releases/latest/minikube-latest.x86_64.rpm
+    state: present
+    disable_gpg_check: true
+  become: true
+  tags:
+    - virt
