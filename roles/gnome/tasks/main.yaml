@@ -16,6 +16,12 @@
     value: "':minimize,maximize,close'"
   when: ansible_facts['hostname'] == "neon"
 
+- name: Change icon size in Nautilus to small
+  dconf:
+    key: "/org/gnome/nautilus/icon-view/default-zoom-level"
+    value: "'small'"
+  when: ansible_facts['hostname'] == "neon"
+
 - name: gnome | shell settings | event-sounds (disable)
   tags: gnome,audio,sounds,alerts
   become_user: dave

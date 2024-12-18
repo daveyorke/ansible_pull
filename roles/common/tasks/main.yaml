@@ -20,6 +20,7 @@
     - { name: "com.valvesoftware.Steam" }
     - { name: "com.valvesoftware.Steam.CompatibilityTool.Proton-GE" }
     - { name: "com.todoist.Todoist" }
+    - { name: "com.obsproject.Studio" }
   when: ansible_facts['hostname'] == "neon"
   become: true
 
