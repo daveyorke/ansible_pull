@@ -4,10 +4,13 @@
     state: present
   with_items:
     - { name: "htop" }
+    - { name: "btop" }
     - { name: "vim" }
     - { name: "screenfetch" }
     - { name: "eza" }
     - { name: "google-chrome-stable" }
+    - { name: "fzf" }
+    - { name: "wol" }
   when: ansible_facts['hostname'] == "neon"
   become: true
 

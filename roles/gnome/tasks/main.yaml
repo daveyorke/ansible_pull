@@ -29,6 +29,13 @@
     key: "/org/gnome/desktop/sound/event-sounds"
     value: "false"
 
+- name: gnome | shell settings | overamplification (enable)
+  tags: gnome,audio,sounds
+  become_user: dave
+  dconf:
+    key: "/org/gnome/desktop/sound/allow-volume-above-100-percent"
+    value: "true"
+
 - name: Setup gnome favorite apps (dock) - Fedora 40
   dconf:
     key: "/org/gnome/shell/favorite-apps"

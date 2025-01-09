@@ -48,3 +48,13 @@
   become: true
   tags:
     - virt
+
+- name: Install Podman Desktop
+  community.general.flatpak:
+    name: "{{ item.name }}"
+    state: present
+  with_items:
+    - { name: "io.podman_desktop.PodmanDesktop" }
+  when: ansible_facts['hostname'] == "neon"
+  become: true
+
