@@ -7,10 +7,19 @@
     - { name: "btop" }
     - { name: "vim" }
     - { name: "screenfetch" }
+    - { name: "ranger" }
     - { name: "eza" }
     - { name: "google-chrome-stable" }
     - { name: "fzf" }
     - { name: "wol" }
+  when: ansible_facts['hostname'] == "neon"
+  become: true
+
+- name: Set vim as default editor
+  ansible.builtin.dnf:
+    name: vim-default-editor
+    state: present
+    allowerasing: true
   when: ansible_facts['hostname'] == "neon"
   become: true
 
@@ -54,7 +63,7 @@
 
 - name: create symlinks to ~/Dropbox/*
   ansible.builtin.file:
-    src: "{{ lookup('env', 'HOME') }}/Dropbox/{{ lookup('env', 'USERNAME') }}/{{ item.name }}"
+    src: "{{ lookup('env', 'HOME') }}/Dropbox/{{ lookup('env', 'USER') }}/{{ item.name }}"
     dest: "{{ lookup('env', 'HOME') }}/{{ item.name }}"
     state: link
     force: yes
