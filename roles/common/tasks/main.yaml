@@ -7,11 +7,13 @@
     - { name: "btop" }
     - { name: "vim" }
     - { name: "screenfetch" }
-    - { name: "ranger" }
+    - { name: "vifm" }
     - { name: "eza" }
     - { name: "google-chrome-stable" }
     - { name: "fzf" }
     - { name: "wol" }
+    - { name: "dnf-plugins-core" }
+    - { name: "libappindicator-gtk3" }
   when: ansible_facts['hostname'] == "neon"
   become: true
 
@@ -43,6 +45,7 @@
     state: present
     disable_gpg_check: true
   become: true
+  ignore_errors: true
   tags:
     - dropbox
 
